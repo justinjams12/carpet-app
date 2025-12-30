@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Choice Floors - Advanced Pro</title>
+    <style>
+        :root {
+            --navy: #0f172a; --gold: #c5a059; --blueprint-bg: #1e293b;
+            --glass: rgba(255, 255, 255, 0.95); --text: #334155;
+        }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #f1f5f9; color: var(--text); padding-bottom: 60px; }
+        .app-shell { width: 100%; max-width: 480px; margin: auto; padding: 20px; box-sizing: border-box; }
+        
+        /* Header & Result */
+        .app-header { text-align: center; padding-bottom: 20px; }
+        .logo-img { height: 45px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .live-result { background: var(--navy); color: white; border-radius: 24px; padding: 25px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .total-amount { font-size: 2.5rem; font-weight: 800; color: var(--gold); margin: 5px 0; }
 
+        /* Blueprint */
+        .blueprint-card { background: var(--blueprint-bg); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 2px solid #334155; }
+        #blueprint { width: 100%; height: 160px; }
+        .seam-line { stroke: #ef4444; stroke-width: 2; stroke-dasharray: 4,4; }
+
+        /* Cards & Inputs */
+        .card { background: var(--glass); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: var(--gold); }
+        
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        label { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; background: white; }
+        
+        /* Advanced Panel Toggle */
+        .adv-toggle { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-align: center; margin-bottom: 15px; transition: 0.3s; }
+        .adv-toggle:hover { background: #e2e8f0; }
+        #advPanel { display: none; padding-top: 10px; border-top: 1px solid #e2e8f0; margin-top: 10px; }
+        
+        .btn-add { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--gold); color: white; font-weight: 800; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header class="app-header"><img src="choice-floors-logo.png" class="logo-img"></header>
+
+    <div class="live-result">
+        <div class="total-amount" id="displayTotal">$0.00</div>
+        <div id="displaySub" style="font-size: 0.85rem; opacity: 0.8;">0.00 Total Yards Needed</div>
+    </div>
+
+    <div class="blueprint-card">
+        <svg id="blueprint" viewBox="0 0 200 200">
+            <rect id="roomRect" x="50" y="50" width="0" height="0" fill="rgba(197, 160, 89, 0.15)" stroke="#c5a059" stroke-width="1.5" />
+            <g id="seamGroup"></g>
+        </svg>
+    </div>
+
+    <div class="card">
+        <div class="section-title">Standard Measurements</div>
+        <div class="row">
+            <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="calculate()"></div>
+            <div><label>Length (ft)</label><input type="number" id="lB" placeholder="0" oninput="calculate()"></div>
+        </div>
+
+        <div class="adv-toggle" onclick="toggleAdv()">⚙ Advanced Installation Filters</div>
+        
+        <div id="advPanel">
+            <div class="row">
+                <div>
+                    <label>Roll Width</label>
+                    <select id="rollWidth" onchange="calculate()">
+                        <option value="12">12' Standard</option>
+                        <option value="13.5">13.5' Specialty</option>
+                        <option value="15">15' Wide</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Waste Allowance %</label>
+                    <input type="number" id="waste" value="10" oninput="calculate()">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label>Seam Overlap (in)</label>
+                    <input type="number" id="overlap" value="3" oninput="calculate()">
+                </div>
+                <div>
+                    <label>Pattern Repeat (in)</label>
+                    <input type="number" id="repeat" value="0" oninput="calculate()">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-add" onclick="saveRoom()">Save to Project History</button>
+    </div>
+</div>
+
+<script>
+    function toggleAdv() {
+        let p = document.getElementById('advPanel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function calculate() {
+        const w = parseFloat(document.getElementById('wA').value) || 0;
+        const l = parseFloat(document.getElementById('lB').value) || 0;
+        const rollW = parseFloat(document.getElementById('rollWidth').value);
+        const waste = (parseFloat(document.getElementById('waste').value) || 0) / 100;
+        const overlap = (parseFloat(document.getElementById('overlap').value) || 0) / 12; // convert to ft
+        const repeat = (parseFloat(document.getElementById('repeat').value) || 0) / 12; // convert to ft
+
+        // Blueprint Logic
+        let rect = document.getElementById('roomRect');
+        let seamGroup = document.getElementById('seamGroup');
+        seamGroup.innerHTML = ""; 
+        let scale = 150 / Math.max(w, l, 1);
+        let startX = (200 - (w * scale)) / 2;
+        let startY = (200 - (l * scale)) / 2;
+        rect.setAttribute('width', w * scale); rect.setAttribute('height', l * scale);
+        rect.setAttribute('x', startX); rect.setAttribute('y', startY);
+
+        if (w > 0 && l > 0) {
+            // Seam Logic
+            let strips = Math.ceil(w / rollW);
+            if (w > rollW) {
+                for (let i = 1; i < strips; i++) {
+                    let seamX = startX + (i * rollW * scale);
+                    let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", seamX); line.setAttribute("y1", startY);
+                    line.setAttribute("x2", seamX); line.setAttribute("y2", startY + (l * scale));
+                    line.setAttribute("class", "seam-line");
+                    seamGroup.appendChild(line);
+                }
+            }
+
+            // Technical Yardage Calculation
+            // Add overlap for each seam and pattern repeat for each strip
+            let effectiveLength = l + (strips > 1 ? overlap : 0) + repeat;
+            let totalSqYd = (strips * rollW * effectiveLength) / 9;
+            totalSqYd = totalSqYd * (1 + waste);
+
+            document.getElementById('displayTotal').innerText = `$${(totalSqYd * 35).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('displaySub').innerText = `${totalSqYd.toFixed(2)} Yds (Incl. ${document.getElementById('waste').value}% waste)`;
+        }
+    }
+</script>
+</body>
+</html>
