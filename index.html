@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Choice Floors - Pro Editor</title>
+    <title>Choice Floors - Project Pro</title>
     <style>
         :root {
             --navy: #0f172a; --gold: #c5a059; --blueprint-bg: #1e293b;
@@ -47,7 +47,6 @@
         .dim-badge { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--navy); margin-right: 5px; }
         .room-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
         .edit-icon { cursor: pointer; font-size: 1rem; opacity: 0.6; }
-        .edit-icon:hover { opacity: 1; color: var(--gold); }
     </style>
 </head>
 <body>
@@ -61,7 +60,14 @@
     </div>
 
     <div id="workspace" class="view active">
+        <div class="card" style="border-bottom: 3px solid var(--gold);">
+            <div class="section-title">Project Details</div>
+            <label>Customer / Job Name</label>
+            <input type="text" id="jobName" placeholder="Enter Name (e.g. Smith Residence)" oninput="updateJobHeader()">
+        </div>
+
         <div class="live-result">
+            <div id="projectHeader" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8; margin-bottom: 5px;">New Project</div>
             <div id="displayTotal" style="font-size: 2.2rem; font-weight: 800; color: var(--gold);">$0.00</div>
             <div id="displaySub" style="font-size: 0.85rem; font-weight: 600;">0.00 Yds | 0 SqFt</div>
         </div>
@@ -74,14 +80,14 @@
         </div>
 
         <div class="card">
-            <div class="section-title" id="formTitle">New Room Measurement</div>
-            <input type="text" id="roomName" placeholder="Room Name (e.g. Master Bed)">
+            <div class="section-title" id="formTitle">Room Measurement</div>
+            <input type="text" id="roomName" placeholder="Room Name (e.g. Living Room)">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="drawBlueprint()"></div>
                 <div><label>Length (ft)</label><input type="number" id="lB" placeholder="0" oninput="drawBlueprint()"></div>
             </div>
 
-            <div class="advanced-trigger" onclick="toggleAdvanced()">⚙ Show Advanced Filters</div>
+            <div class="advanced-trigger" onclick="toggleAdvanced()">⚙ Advanced Settings</div>
             <div id="advContent" class="advanced-content">
                 <label>Roll Width</label>
                 <select id="rollWidth" onchange="drawBlueprint()">
@@ -101,8 +107,8 @@
         </div>
 
         <div class="card" id="roomListCard" style="display:none;">
+            <div class="section-title">Project Summary</div>
             <div id="currentRooms"></div>
-            <input type="text" id="jobName" placeholder="Customer Name" style="margin-top:10px;">
             <button class="btn btn-save" onclick="finalizeJob()">Finalize & Save Project</button>
         </div>
     </div>
@@ -117,6 +123,11 @@
     let currentJobRooms = [];
     let editingJobId = null;
     let editingRoomIndex = null;
+
+    function updateJobHeader() {
+        let name = document.getElementById('jobName').value;
+        document.getElementById('projectHeader').innerText = name ? name : "New Project";
+    }
 
     function toggleAdvanced() { document.getElementById('advContent').classList.toggle('show'); }
 
@@ -177,6 +188,7 @@
     function addOrUpdateRoom() {
         let w = parseFloat(document.getElementById('wA').value), l = parseFloat(document.getElementById('lB').value);
         if(!w || !l) return;
+        
         let vals = calculateValues(w, l);
         let roomData = {
             name: document.getElementById('roomName').value || "Room " + (currentJobRooms.length + 1),
@@ -193,7 +205,7 @@
             currentJobRooms[editingRoomIndex] = roomData;
             editingRoomIndex = null;
             document.getElementById('btnAddRoom').innerText = "+ Add Room to List";
-            document.getElementById('formTitle').innerText = "New Room Measurement";
+            document.getElementById('formTitle').innerText = "Room Measurement";
         } else {
             currentJobRooms.push(roomData);
         }
@@ -213,10 +225,9 @@
         document.getElementById('wastePct').value = r.settings.waste;
         document.getElementById('patternRepeat').value = r.settings.repeat;
         document.getElementById('seamOverlap').value = r.settings.overlap;
-        
         document.getElementById('btnAddRoom').innerText = "Update Room Details";
         document.getElementById('formTitle').innerText = "Editing: " + r.name;
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo({top: 150, behavior: 'smooth'});
         drawBlueprint();
     }
 
@@ -240,26 +251,32 @@
     function removeRoom(i) { currentJobRooms.splice(i, 1); updateRoomList(); }
 
     function finalizeJob() {
+        let name = document.getElementById('jobName').value;
+        if(!name) { alert("Please enter a Customer/Job Name first."); return; }
+        
         let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
         let newJob = {
             id: editingJobId || Date.now(),
-            name: document.getElementById('jobName').value || "Unnamed Job",
+            name: name,
             date: new Date().toLocaleDateString(),
             rooms: currentJobRooms,
             total: document.getElementById('displayTotal').innerText,
             summary: document.getElementById('displaySub').innerText
         };
+        
         if (editingJobId) {
             let index = history.findIndex(j => j.id === editingJobId);
             history[index] = newJob;
         } else {
             history.unshift(newJob);
         }
+        
         localStorage.setItem('choiceFloorsHistory', JSON.stringify(history));
         currentJobRooms = []; editingJobId = null; editingRoomIndex = null;
         document.getElementById('jobName').value = "";
+        updateJobHeader();
         updateRoomList();
-        alert("Project Saved!");
+        alert("Project Finalized Successfully!");
     }
 
     function loadHistory() {
@@ -271,7 +288,7 @@
         list.innerHTML = filtered.map(h => `
             <div class="card">
                 <div class="action-group">
-                    <button class="btn-small btn-edit" onclick="editSavedJob(${h.id})">Edit Job</button>
+                    <button class="btn-small btn-edit" onclick="editSavedJob(${h.id})">Edit</button>
                     <button class="btn-small btn-delete" onclick="deleteJob(${h.id})">Del</button>
                 </div>
                 <div style="font-weight:800; color:var(--navy);">${h.name}</div>
@@ -285,12 +302,13 @@
         currentJobRooms = [...job.rooms];
         editingJobId = job.id;
         document.getElementById('jobName').value = job.name;
+        updateJobHeader();
         switchTab('workspace');
         updateRoomList();
     }
 
     function deleteJob(id) {
-        if(confirm("Delete this project?")) {
+        if(confirm("Delete project?")) {
             let hist = JSON.parse(localStorage.getItem('choiceFloorsHistory')).filter(j => j.id !== id);
             localStorage.setItem('choiceFloorsHistory', JSON.stringify(hist));
             loadHistory();
