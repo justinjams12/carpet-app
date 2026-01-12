@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Choice Floors - Project Pro</title>
+    <title>Choice Floors - Integrated Entry</title>
     <style>
         :root {
             --navy: #0f172a; --gold: #c5a059; --blueprint-bg: #1e293b;
@@ -60,12 +60,6 @@
     </div>
 
     <div id="workspace" class="view active">
-        <div class="card" style="border-bottom: 3px solid var(--gold);">
-            <div class="section-title">Project Details</div>
-            <label>Customer / Job Name</label>
-            <input type="text" id="jobName" placeholder="Enter Name (e.g. Smith Residence)" oninput="updateJobHeader()">
-        </div>
-
         <div class="live-result">
             <div id="projectHeader" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8; margin-bottom: 5px;">New Project</div>
             <div id="displayTotal" style="font-size: 2.2rem; font-weight: 800; color: var(--gold);">$0.00</div>
@@ -80,30 +74,36 @@
         </div>
 
         <div class="card">
-            <div class="section-title" id="formTitle">Room Measurement</div>
-            <input type="text" id="roomName" placeholder="Room Name (e.g. Living Room)">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="drawBlueprint()"></div>
-                <div><label>Length (ft)</label><input type="number" id="lB" placeholder="0" oninput="drawBlueprint()"></div>
-            </div>
+            <div class="section-title">Project Details</div>
+            <label>Customer / Job Name</label>
+            <input type="text" id="jobName" placeholder="Enter Name (e.g. Smith Residence)" oninput="updateJobHeader()">
 
-            <div class="advanced-trigger" onclick="toggleAdvanced()">⚙ Advanced Settings</div>
-            <div id="advContent" class="advanced-content">
-                <label>Roll Width</label>
-                <select id="rollWidth" onchange="drawBlueprint()">
-                    <option value="12">12' Standard</option>
-                    <option value="15">15' Wide</option>
-                    <option value="13.5">13.5' Specialty</option>
-                </select>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <div class="section-title" id="formTitle">Room Measurement</div>
+                <input type="text" id="roomName" placeholder="Room Name (e.g. Living Room)">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div><label>Waste %</label><input type="number" id="wastePct" value="10" oninput="drawBlueprint()"></div>
-                    <div><label>Pattern Repeat (in)</label><input type="number" id="patternRepeat" value="0" oninput="drawBlueprint()"></div>
+                    <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="drawBlueprint()"></div>
+                    <div><label>Length (ft)</label><input type="number" id="lB" placeholder="0" oninput="drawBlueprint()"></div>
                 </div>
-                <label>Seam Overlap (inches)</label>
-                <input type="number" id="seamOverlap" value="3" oninput="drawBlueprint()">
-            </div>
 
-            <button class="btn btn-add" id="btnAddRoom" onclick="addOrUpdateRoom()">+ Add Room to List</button>
+                <div class="advanced-trigger" onclick="toggleAdvanced()">⚙ Advanced Settings</div>
+                <div id="advContent" class="advanced-content">
+                    <label>Roll Width</label>
+                    <select id="rollWidth" onchange="drawBlueprint()">
+                        <option value="12">12' Standard</option>
+                        <option value="15">15' Wide</option>
+                        <option value="13.5">13.5' Specialty</option>
+                    </select>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div><label>Waste %</label><input type="number" id="wastePct" value="10" oninput="drawBlueprint()"></div>
+                        <div><label>Pattern Repeat (in)</label><input type="number" id="patternRepeat" value="0" oninput="drawBlueprint()"></div>
+                    </div>
+                    <label>Seam Overlap (inches)</label>
+                    <input type="number" id="seamOverlap" value="3" oninput="drawBlueprint()">
+                </div>
+
+                <button class="btn btn-add" id="btnAddRoom" onclick="addOrUpdateRoom()">+ Add Room to List</button>
+            </div>
         </div>
 
         <div class="card" id="roomListCard" style="display:none;">
@@ -227,7 +227,8 @@
         document.getElementById('seamOverlap').value = r.settings.overlap;
         document.getElementById('btnAddRoom').innerText = "Update Room Details";
         document.getElementById('formTitle').innerText = "Editing: " + r.name;
-        window.scrollTo({top: 150, behavior: 'smooth'});
+        // Scroll to the edit section
+        document.getElementById('formTitle').scrollIntoView({behavior: 'smooth'});
         drawBlueprint();
     }
 
@@ -252,7 +253,7 @@
 
     function finalizeJob() {
         let name = document.getElementById('jobName').value;
-        if(!name) { alert("Please enter a Customer/Job Name first."); return; }
+        if(!name) { alert("Please enter a Customer/Job Name."); return; }
         
         let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
         let newJob = {
