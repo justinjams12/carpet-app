@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Choice Floors - Dimensions Pro</title>
+    <title>Choice Floors - Pro Editor</title>
     <style>
         :root {
             --navy: #0f172a; --gold: #c5a059; --blueprint-bg: #1e293b;
@@ -41,11 +41,13 @@
         .btn-delete { background: #fee2e2; color: var(--danger); }
         
         input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; margin-bottom: 10px; box-sizing: border-box; }
-        .search-input { background: white; border: 2px solid var(--navy); margin-bottom: 20px; }
         label { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
 
-        .room-tag { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--gold); font-size: 0.85rem; }
+        .room-tag { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--gold); font-size: 0.85rem; position: relative; }
         .dim-badge { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--navy); margin-right: 5px; }
+        .room-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
+        .edit-icon { cursor: pointer; font-size: 1rem; opacity: 0.6; }
+        .edit-icon:hover { opacity: 1; color: var(--gold); }
     </style>
 </head>
 <body>
@@ -62,7 +64,6 @@
         <div class="live-result">
             <div id="displayTotal" style="font-size: 2.2rem; font-weight: 800; color: var(--gold);">$0.00</div>
             <div id="displaySub" style="font-size: 0.85rem; font-weight: 600;">0.00 Yds | 0 SqFt</div>
-            <div id="liveDims" style="font-size: 0.7rem; opacity: 0.7; margin-top: 5px;">0' × 0'</div>
         </div>
 
         <div class="blueprint-card">
@@ -73,7 +74,7 @@
         </div>
 
         <div class="card">
-            <div class="section-title">Room Measurement</div>
+            <div class="section-title" id="formTitle">New Room Measurement</div>
             <input type="text" id="roomName" placeholder="Room Name (e.g. Master Bed)">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="drawBlueprint()"></div>
@@ -96,7 +97,7 @@
                 <input type="number" id="seamOverlap" value="3" oninput="drawBlueprint()">
             </div>
 
-            <button class="btn btn-add" onclick="addRoom()">+ Add Room to List</button>
+            <button class="btn btn-add" id="btnAddRoom" onclick="addOrUpdateRoom()">+ Add Room to List</button>
         </div>
 
         <div class="card" id="roomListCard" style="display:none;">
@@ -107,18 +108,17 @@
     </div>
 
     <div id="history" class="view">
-        <input type="text" id="historySearch" class="search-input" placeholder="🔍 Search Customer or Room Name..." oninput="loadHistory()">
+        <input type="text" id="historySearch" class="search-input" placeholder="🔍 Search History..." oninput="loadHistory()" style="width:100%; padding:12px; border-radius:10px; border:2px solid var(--navy); margin-bottom:15px;">
         <div id="historyList"></div>
     </div>
 </div>
 
 <script>
     let currentJobRooms = [];
-    let editingId = null;
+    let editingJobId = null;
+    let editingRoomIndex = null;
 
-    function toggleAdvanced() {
-        document.getElementById('advContent').classList.toggle('show');
-    }
+    function toggleAdvanced() { document.getElementById('advContent').classList.toggle('show'); }
 
     function switchTab(tabId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -134,8 +134,7 @@
         let repeat = (parseFloat(document.getElementById('patternRepeat').value) || 0) / 12;
         let overlap = (parseFloat(document.getElementById('seamOverlap').value) || 0) / 12;
         let strips = Math.ceil(w / rW);
-        let effectiveLength = l + (strips > 1 ? overlap : 0) + repeat;
-        let sqFt = strips * rW * effectiveLength * waste;
+        let sqFt = strips * rW * (l + (strips > 1 ? overlap : 0) + repeat) * waste;
         return { yards: sqFt / 9, sqFt: sqFt };
     }
 
@@ -151,7 +150,6 @@
         let sX = (200 - dW) / 2, sY = (200 - dL) / 2;
         rect.setAttribute('width', dW); rect.setAttribute('height', dL);
         rect.setAttribute('x', sX); rect.setAttribute('y', sY);
-
         if (w > rW) {
             let numSeams = Math.floor((w - 0.01) / rW);
             for (let i = 1; i <= numSeams; i++) {
@@ -169,7 +167,6 @@
     function updateLiveTotals() {
         let w = parseFloat(document.getElementById('wA').value) || 0;
         let l = parseFloat(document.getElementById('lB').value) || 0;
-        document.getElementById('liveDims').innerText = `${w}' × ${l}'`;
         if (w > 0 && l > 0) {
             let vals = calculateValues(w, l);
             document.getElementById('displayTotal').innerText = `$${(vals.yards * 35).toFixed(2)}`;
@@ -177,11 +174,11 @@
         }
     }
 
-    function addRoom() {
+    function addOrUpdateRoom() {
         let w = parseFloat(document.getElementById('wA').value), l = parseFloat(document.getElementById('lB').value);
         if(!w || !l) return;
         let vals = calculateValues(w, l);
-        currentJobRooms.push({
+        let roomData = {
             name: document.getElementById('roomName').value || "Room " + (currentJobRooms.length + 1),
             w, l, yards: vals.yards, sqFt: vals.sqFt,
             settings: { 
@@ -190,9 +187,36 @@
                 repeat: document.getElementById('patternRepeat').value,
                 overlap: document.getElementById('seamOverlap').value
             }
-        });
+        };
+
+        if(editingRoomIndex !== null) {
+            currentJobRooms[editingRoomIndex] = roomData;
+            editingRoomIndex = null;
+            document.getElementById('btnAddRoom').innerText = "+ Add Room to List";
+            document.getElementById('formTitle').innerText = "New Room Measurement";
+        } else {
+            currentJobRooms.push(roomData);
+        }
+
         updateRoomList();
         ['roomName','wA','lB'].forEach(id => document.getElementById(id).value = "");
+        drawBlueprint();
+    }
+
+    function editRoom(index) {
+        let r = currentJobRooms[index];
+        editingRoomIndex = index;
+        document.getElementById('roomName').value = r.name;
+        document.getElementById('wA').value = r.w;
+        document.getElementById('lB').value = r.l;
+        document.getElementById('rollWidth').value = r.settings.rW;
+        document.getElementById('wastePct').value = r.settings.waste;
+        document.getElementById('patternRepeat').value = r.settings.repeat;
+        document.getElementById('seamOverlap').value = r.settings.overlap;
+        
+        document.getElementById('btnAddRoom').innerText = "Update Room Details";
+        document.getElementById('formTitle').innerText = "Editing: " + r.name;
+        window.scrollTo({top: 0, behavior: 'smooth'});
         drawBlueprint();
     }
 
@@ -201,11 +225,12 @@
         let totalSqFt = currentJobRooms.reduce((s, r) => s + r.sqFt, 0);
         document.getElementById('currentRooms').innerHTML = currentJobRooms.map((r, i) => `
             <div class="room-tag">
-                <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
-                    <b>${r.name}</b>
-                    <span onclick="removeRoom(${i})" style="color:var(--danger); cursor:pointer">✕</span>
+                <b>${r.name}</b>
+                <div class="room-actions">
+                    <span class="edit-icon" onclick="editRoom(${i})">✏️</span>
+                    <span class="edit-icon" onclick="removeRoom(${i})" style="color:var(--danger)">✕</span>
                 </div>
-                <div><span class="dim-badge">${r.w}' × ${r.l}'</span> ${r.yards.toFixed(2)} Yds | ${Math.round(r.sqFt)} SqFt</div>
+                <div style="margin-top:4px;"><span class="dim-badge">${r.w}' × ${r.l}'</span> ${r.yards.toFixed(2)} Yds | ${Math.round(r.sqFt)} SqFt</div>
             </div>`).join('');
         document.getElementById('roomListCard').style.display = currentJobRooms.length ? 'block' : 'none';
         document.getElementById('displayTotal').innerText = `$${(totalYds * 35).toFixed(2)}`;
@@ -217,54 +242,48 @@
     function finalizeJob() {
         let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
         let newJob = {
-            id: editingId || Date.now(),
+            id: editingJobId || Date.now(),
             name: document.getElementById('jobName').value || "Unnamed Job",
             date: new Date().toLocaleDateString(),
             rooms: currentJobRooms,
             total: document.getElementById('displayTotal').innerText,
             summary: document.getElementById('displaySub').innerText
         };
-        if (editingId) {
-            let index = history.findIndex(j => j.id === editingId);
+        if (editingJobId) {
+            let index = history.findIndex(j => j.id === editingJobId);
             history[index] = newJob;
         } else {
             history.unshift(newJob);
         }
         localStorage.setItem('choiceFloorsHistory', JSON.stringify(history));
-        currentJobRooms = []; editingId = null; 
+        currentJobRooms = []; editingJobId = null; editingRoomIndex = null;
         document.getElementById('jobName').value = "";
         updateRoomList();
-        alert("Job Saved to History!");
+        alert("Project Saved!");
     }
 
     function loadHistory() {
         let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
-        let searchTerm = document.getElementById('historySearch').value.toLowerCase();
+        let term = document.getElementById('historySearch').value.toLowerCase();
         let list = document.getElementById('historyList');
-        
-        let filtered = history.filter(h => 
-            h.name.toLowerCase().includes(searchTerm) || 
-            h.rooms.some(r => r.name.toLowerCase().includes(searchTerm))
-        );
+        let filtered = history.filter(h => h.name.toLowerCase().includes(term) || h.rooms.some(r => r.name.toLowerCase().includes(term)));
 
         list.innerHTML = filtered.map(h => `
             <div class="card">
                 <div class="action-group">
-                    <button class="btn-small btn-edit" onclick="editJob(${h.id})">Edit</button>
+                    <button class="btn-small btn-edit" onclick="editSavedJob(${h.id})">Edit Job</button>
                     <button class="btn-small btn-delete" onclick="deleteJob(${h.id})">Del</button>
                 </div>
                 <div style="font-weight:800; color:var(--navy);">${h.name}</div>
                 <div style="font-size:0.75rem; color:var(--gold); font-weight:700; margin: 4px 0;">${h.summary} • ${h.total}</div>
-                <div style="font-size:0.7rem; color:#94a3b8; margin-bottom:10px;">${h.date} • ${h.rooms.length} Rooms</div>
-                ${h.rooms.map(r => `<div style="font-size:0.75rem; opacity:0.8;">- ${r.name}: ${r.w}'x${r.l}'</div>`).join('')}
+                ${h.rooms.map(r => `<div style="font-size:0.75rem; opacity:0.7;">- ${r.name}: ${r.w}'x${r.l}'</div>`).join('')}
             </div>`).join('');
     }
 
-    function editJob(id) {
-        let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
-        let job = history.find(j => j.id === id);
+    function editSavedJob(id) {
+        let job = JSON.parse(localStorage.getItem('choiceFloorsHistory')).find(j => j.id === id);
         currentJobRooms = [...job.rooms];
-        editingId = job.id;
+        editingJobId = job.id;
         document.getElementById('jobName').value = job.name;
         switchTab('workspace');
         updateRoomList();
@@ -272,8 +291,8 @@
 
     function deleteJob(id) {
         if(confirm("Delete this project?")) {
-            let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
-            localStorage.setItem('choiceFloorsHistory', JSON.stringify(history.filter(j => j.id !== id)));
+            let hist = JSON.parse(localStorage.getItem('choiceFloorsHistory')).filter(j => j.id !== id);
+            localStorage.setItem('choiceFloorsHistory', JSON.stringify(hist));
             loadHistory();
         }
     }
