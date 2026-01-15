@@ -3,65 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Choice Floors - Pro Measure</title>
+    <title>Choice Floors - Pro</title>
     <style>
         :root {
-            /* Choice Floors Brand Palette */
             --choice-blue: #2b6291; 
             --choice-green: #9dbb4c;
-            --choice-green-dark: #8aa642;
             --choice-blue-light: #eef4f9;
-            --blueprint-bg: #f8fafc;
             --text: #1e293b;
             --danger: #ef4444;
-            --glass: #ffffff;
         }
         body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: #f1f5f9; color: var(--text); padding-bottom: 60px; }
         .app-shell { width: 100%; max-width: 480px; margin: auto; padding: 15px; box-sizing: border-box; }
         
-        /* Brand Navigation */
         .tabs { display: flex; background: var(--choice-blue); padding: 6px; border-radius: 12px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: none; color: white; font-weight: 700; cursor: pointer; border-radius: 8px; opacity: 0.7; transition: all 0.2s; }
-        .tab-btn.active { background: var(--choice-green); opacity: 1; color: white; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; color: white; font-weight: 700; cursor: pointer; border-radius: 8px; opacity: 0.7; }
+        .tab-btn.active { background: var(--choice-green); opacity: 1; }
 
         .view { display: none; }
         .view.active { display: block; }
 
-        /* Results Display */
-        .live-result { background: var(--choice-blue); color: white; border-radius: 18px; padding: 25px; text-align: center; margin-bottom: 15px; position: relative; overflow: hidden; }
-        .live-result::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: var(--choice-green); }
-        
+        .live-result { background: var(--choice-blue); color: white; border-radius: 18px; padding: 25px; text-align: center; margin-bottom: 15px; border-bottom: 5px solid var(--choice-green); }
         .blueprint-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 15px; border: 2px solid var(--choice-blue-light); }
         #blueprint { width: 100%; height: 160px; }
         .seam-line { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 4,4; }
 
-        /* Form Cards */
-        .card { background: var(--glass); border-radius: 18px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .section-title { font-size: 0.7rem; font-weight: 900; color: var(--choice-blue); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; display: flex; align-items: center; }
-        .section-title::after { content: ''; height: 2px; flex-grow: 1; background: var(--choice-blue-light); margin-left: 10px; }
-
-        /* Form Controls */
-        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; -webkit-appearance: none; }
-        input:focus { outline: none; border-color: var(--choice-blue); background: var(--choice-blue-light); }
+        .card { background: white; border-radius: 18px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .section-title { font-size: 0.7rem; font-weight: 900; color: var(--choice-blue); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; }
+        
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
         label { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
 
-        /* Buttons */
-        .btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; transition: transform 0.1s ease; }
+        .advanced-trigger { background: var(--choice-blue-light); border: 1px dashed var(--choice-blue); padding: 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-align: center; cursor: pointer; margin-bottom: 15px; }
+        .advanced-content { display: none; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+        .advanced-content.show { display: block; }
+
+        .btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; }
         .btn-add { background: var(--choice-blue); color: white; }
         .btn-save { background: var(--choice-green); color: white; margin-top: 10px; }
-        .btn:active { transform: scale(0.97); }
-
-        /* Room Summary Tags */
+        
         .room-tag { background: var(--choice-blue-light); padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--choice-green); position: relative; }
+        .room-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 12px; }
+        .edit-icon { cursor: pointer; font-size: 1.1rem; }
         .dim-badge { background: var(--choice-blue); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: white; margin-right: 5px; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <header style="text-align:center; padding: 10px 0 20px 0;">
-        <img src="choice-floors-logo.png" style="max-height: 50px; width: auto;" alt="Choice Floors">
-    </header>
+    <header style="text-align:center; padding-bottom: 15px;"><img src="choice-floors-logo.png" style="max-height: 50px;"></header>
 
     <div class="tabs">
         <button class="tab-btn active" id="tab-workspace" onclick="switchTab('workspace')">Measure</button>
@@ -70,9 +59,9 @@
 
     <div id="workspace" class="view active">
         <div class="live-result">
-            <div id="projectHeader" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;">New Project</div>
+            <div id="projectHeader" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9;">New Project</div>
             <div id="displayTotal" style="font-size: 2.2rem; font-weight: 900;">$0.00</div>
-            <div id="displaySub" style="font-size: 0.85rem; font-weight: 600; color: var(--choice-green);">0.00 Yds | 0 SqFt</div>
+            <div id="displaySub" style="font-size: 0.85rem; font-weight: 600;">0.00 Yds | 0 SqFt</div>
         </div>
 
         <div class="blueprint-card">
@@ -85,67 +74,97 @@
         <div class="card">
             <div class="section-title">Project Details</div>
             <label>Customer Name</label>
-            <input type="text" id="jobName" placeholder="e.g. Johnson Residence" oninput="updateJobHeader()">
+            <input type="text" id="jobName" placeholder="e.g. Smith Job" oninput="updateJobHeader()">
 
-            <div style="margin-top: 20px;">
-                <div class="section-title" id="formTitle">Room Specs</div>
-                <input type="text" id="roomName" placeholder="e.g. Living Room">
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <div class="section-title" id="formTitle">Room Measurement</div>
+                <input type="text" id="roomName" placeholder="Room Name">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div><label>Width (ft)</label><input type="number" id="wA" placeholder="0" oninput="drawBlueprint()"></div>
                     <div><label>Length (ft)</label><input type="number" id="lB" placeholder="0" oninput="drawBlueprint()"></div>
                 </div>
+
+                <div class="advanced-trigger" onclick="toggleAdvanced()">⚙ Advanced Options</div>
+                <div id="advContent" class="advanced-content">
+                    <label>Roll Width</label>
+                    <select id="rollWidth" onchange="drawBlueprint()">
+                        <option value="12">12' Standard</option>
+                        <option value="15">15' Wide</option>
+                        <option value="13.5">13.5' Specialty</option>
+                    </select>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div><label>Waste %</label><input type="number" id="wastePct" value="10" oninput="drawBlueprint()"></div>
+                        <div><label>Pattern Repeat (in)</label><input type="number" id="patternRepeat" value="0" oninput="drawBlueprint()"></div>
+                    </div>
+                    <label>Seam Overlap (inches)</label>
+                    <input type="number" id="seamOverlap" value="3" oninput="drawBlueprint()">
+                </div>
+
                 <button class="btn btn-add" id="btnAddRoom" onclick="addOrUpdateRoom()">+ Add Room to List</button>
             </div>
         </div>
 
         <div class="card" id="roomListCard" style="display:none;">
-            <div class="section-title">Summary</div>
+            <div class="section-title">Job Summary</div>
             <div id="currentRooms"></div>
-            <button class="btn btn-save" onclick="finalizeJob()">Finalize & Save Project</button>
+            <button class="btn btn-save" onclick="finalizeJob()">Finalize & Save</button>
         </div>
     </div>
 
     <div id="history" class="view">
-        <input type="text" id="historySearch" placeholder="🔍 Search History..." oninput="loadHistory()">
+        <input type="text" id="historySearch" placeholder="🔍 Search..." oninput="loadHistory()" style="width:100%; padding:12px; border-radius:10px; margin-bottom:15px;">
         <div id="historyList"></div>
     </div>
 </div>
 
 <script>
-    // Logic remains consistent with previous version
     let currentJobRooms = [];
     let editingJobId = null;
     let editingRoomIndex = null;
 
-    function updateJobHeader() {
-        let name = document.getElementById('jobName').value;
-        document.getElementById('projectHeader').innerText = name ? name : "New Project";
-    }
-
-    function switchTab(tabId) {
+    function toggleAdvanced() { document.getElementById('advContent').classList.toggle('show'); }
+    function updateJobHeader() { document.getElementById('projectHeader').innerText = document.getElementById('jobName').value || "New Project"; }
+    function switchTab(t) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        document.getElementById('tab-' + tabId).classList.add('active');
-        if(tabId === 'history') loadHistory();
+        document.getElementById(t).classList.add('active');
+        document.getElementById('tab-' + t).classList.add('active');
+        if(t === 'history') loadHistory();
     }
 
     function calculateValues(w, l) {
-        let rW = 12; // Default 12' roll
-        let waste = 1.10; // 10% waste
+        let rW = parseFloat(document.getElementById('rollWidth').value);
+        let waste = 1 + (parseFloat(document.getElementById('wastePct').value) / 100);
+        let repeat = (parseFloat(document.getElementById('patternRepeat').value) || 0) / 12;
+        let overlap = (parseFloat(document.getElementById('seamOverlap').value) || 0) / 12;
         let strips = Math.ceil(w / rW);
-        let sqFt = strips * rW * l * waste;
+        let sqFt = strips * rW * (l + (strips > 1 ? overlap : 0) + repeat) * waste;
         return { yards: sqFt / 9, sqFt: sqFt };
     }
 
     function drawBlueprint() {
         let w = parseFloat(document.getElementById('wA').value) || 0;
         let l = parseFloat(document.getElementById('lB').value) || 0;
+        let rW = parseFloat(document.getElementById('rollWidth').value);
         let rect = document.getElementById('roomRect');
+        let seamGroup = document.getElementById('seamGroup');
+        seamGroup.innerHTML = ""; 
         let scale = 140 / Math.max(w, l, 1);
         let dW = w * scale, dL = l * scale;
+        let sX = (200 - dW) / 2, sY = (200 - dL) / 2;
         rect.setAttribute('width', dW); rect.setAttribute('height', dL);
-        rect.setAttribute('x', (200 - dW) / 2); rect.setAttribute('y', (200 - dL) / 2);
+        rect.setAttribute('x', sX); rect.setAttribute('y', sY);
+        if (w > rW) {
+            let numSeams = Math.floor((w - 0.01) / rW);
+            for (let i = 1; i <= numSeams; i++) {
+                let sX_pos = sX + (i * rW * scale);
+                let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", sX_pos); line.setAttribute("y1", sY);
+                line.setAttribute("x2", sX_pos); line.setAttribute("y2", sY + dL);
+                line.setAttribute("class", "seam-line");
+                seamGroup.appendChild(line);
+            }
+        }
         updateLiveTotals();
     }
 
@@ -153,57 +172,104 @@
         let w = parseFloat(document.getElementById('wA').value) || 0;
         let l = parseFloat(document.getElementById('lB').value) || 0;
         if (w > 0 && l > 0) {
-            let vals = calculateValues(w, l);
-            document.getElementById('displayTotal').innerText = `$${(vals.yards * 35).toFixed(2)}`;
-            document.getElementById('displaySub').innerText = `${vals.yards.toFixed(2)} Yds | ${Math.round(vals.sqFt)} SqFt`;
+            let v = calculateValues(w, l);
+            document.getElementById('displayTotal').innerText = `$${(v.yards * 35).toFixed(2)}`;
+            document.getElementById('displaySub').innerText = `${v.yards.toFixed(2)} Yds | ${Math.round(v.sqFt)} SqFt`;
         }
     }
 
     function addOrUpdateRoom() {
         let w = parseFloat(document.getElementById('wA').value), l = parseFloat(document.getElementById('lB').value);
         if(!w || !l) return;
-        let vals = calculateValues(w, l);
-        currentJobRooms.push({
+        let v = calculateValues(w, l);
+        let data = {
             name: document.getElementById('roomName').value || "Room " + (currentJobRooms.length + 1),
-            w, l, yards: vals.yards, sqFt: vals.sqFt
-        });
+            w, l, yards: v.yards, sqFt: v.sqFt,
+            settings: { 
+                rW: document.getElementById('rollWidth').value,
+                waste: document.getElementById('wastePct').value,
+                repeat: document.getElementById('patternRepeat').value,
+                overlap: document.getElementById('seamOverlap').value
+            }
+        };
+        if(editingRoomIndex !== null) {
+            currentJobRooms[editingRoomIndex] = data;
+            editingRoomIndex = null;
+            document.getElementById('btnAddRoom').innerText = "+ Add Room to List";
+        } else {
+            currentJobRooms.push(data);
+        }
         updateRoomList();
         ['roomName','wA','lB'].forEach(id => document.getElementById(id).value = "");
         drawBlueprint();
     }
 
+    function editRoom(i) {
+        let r = currentJobRooms[i];
+        editingRoomIndex = i;
+        document.getElementById('roomName').value = r.name;
+        document.getElementById('wA').value = r.w;
+        document.getElementById('lB').value = r.l;
+        document.getElementById('rollWidth').value = r.settings.rW;
+        document.getElementById('wastePct').value = r.settings.waste;
+        document.getElementById('patternRepeat').value = r.settings.repeat;
+        document.getElementById('seamOverlap').value = r.settings.overlap;
+        document.getElementById('btnAddRoom').innerText = "Update Room";
+        document.getElementById('formTitle').scrollIntoView({behavior: 'smooth'});
+        drawBlueprint();
+    }
+
     function updateRoomList() {
         let totalYds = currentJobRooms.reduce((s, r) => s + r.yards, 0);
+        let totalSqFt = currentJobRooms.reduce((s, r) => s + r.sqFt, 0);
         document.getElementById('currentRooms').innerHTML = currentJobRooms.map((r, i) => `
             <div class="room-tag">
-                <b>${r.name}</b>
-                <div style="margin-top:4px;"><span class="dim-badge">${r.w}' × ${r.l}'</span> ${r.yards.toFixed(2)} Yds</div>
+                <b style="color:var(--choice-blue)">${r.name}</b>
+                <div class="room-actions">
+                    <span class="edit-icon" onclick="editRoom(${i})">✏️</span>
+                    <span class="edit-icon" onclick="currentJobRooms.splice(${i},1);updateRoomList();" style="color:var(--danger)">✕</span>
+                </div>
+                <div style="margin-top:5px;"><span class="dim-badge">${r.w}' × ${r.l}'</span> ${r.yards.toFixed(2)} Yds</div>
             </div>`).join('');
         document.getElementById('roomListCard').style.display = currentJobRooms.length ? 'block' : 'none';
         document.getElementById('displayTotal').innerText = `$${(totalYds * 35).toFixed(2)}`;
-        document.getElementById('displaySub').innerText = `${totalYds.toFixed(2)} Total Yds`;
+        document.getElementById('displaySub').innerText = `${totalYds.toFixed(2)} Total Yds | ${Math.round(totalSqFt)} Total SqFt`;
     }
 
     function finalizeJob() {
         let name = document.getElementById('jobName').value;
-        if(!name) { alert("Please enter a Customer Name."); return; }
+        if(!name) { alert("Add customer name."); return; }
         let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
-        history.unshift({ name, rooms: [...currentJobRooms], date: new Date().toLocaleDateString() });
+        let job = { id: editingJobId || Date.now(), name, date: new Date().toLocaleDateString(), rooms: [...currentJobRooms], total: document.getElementById('displayTotal').innerText, summary: document.getElementById('displaySub').innerText };
+        if(editingJobId) { let i = history.findIndex(j => j.id === editingJobId); history[i] = job; }
+        else { history.unshift(job); }
         localStorage.setItem('choiceFloorsHistory', JSON.stringify(history));
-        currentJobRooms = [];
+        currentJobRooms = []; editingJobId = null;
         document.getElementById('jobName').value = "";
         updateJobHeader(); updateRoomList();
-        alert("Project Saved to History");
+        alert("Project Saved.");
     }
 
     function loadHistory() {
-        let history = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
-        document.getElementById('historyList').innerHTML = history.map(h => `
-            <div class="card" style="border-top: 4px solid var(--choice-green);">
-                <div style="font-weight:900; color:var(--choice-blue);">${h.name}</div>
-                <div style="font-size:0.75rem; opacity:0.7; margin-bottom:5px;">${h.date}</div>
-                ${h.rooms.map(r => `<div style="font-size:0.8rem;">• ${r.name}: ${r.w}'x${r.l}'</div>`).join('')}
+        let hist = JSON.parse(localStorage.getItem('choiceFloorsHistory') || '[]');
+        let term = document.getElementById('historySearch').value.toLowerCase();
+        let filtered = hist.filter(h => h.name.toLowerCase().includes(term));
+        document.getElementById('historyList').innerHTML = filtered.map(h => `
+            <div class="card" style="border-left: 5px solid var(--choice-green);">
+                <div style="font-weight:900; color:var(--choice-blue)">${h.name}</div>
+                <div style="font-size:0.75rem; margin-bottom:5px;">${h.date} • ${h.summary}</div>
+                <button class="btn-small" style="background:var(--choice-blue-light); border:none; padding:5px 10px; border-radius:5px; font-weight:700; cursor:pointer;" onclick="editSavedJob(${h.id})">Reload Job</button>
             </div>`).join('');
+    }
+
+    function editSavedJob(id) {
+        let job = JSON.parse(localStorage.getItem('choiceFloorsHistory')).find(j => j.id === id);
+        currentJobRooms = [...job.rooms];
+        editingJobId = job.id;
+        document.getElementById('jobName').value = job.name;
+        updateJobHeader();
+        switchTab('workspace');
+        updateRoomList();
     }
 </script>
 </body>
