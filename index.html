@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Choice Floors - Custom Rug Pro</title>
+    <title>Choice Floors - Rug Fabrication Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -52,8 +52,6 @@
         .btn-edit { color: var(--choice-blue); }
         .btn-remove { color: var(--danger); }
 
-        .search-input { margin-bottom: 15px; border: 2px solid var(--choice-blue); }
-
         /* PDF TEMPLATE STYLING */
         #pdf-template { position: absolute; left: -9999px; width: 850px; background: #fff; color: #1e293b; padding: 0; }
         .pdf-header-wrapper { background: white; padding: 40px 60px 0 60px; display: flex; justify-content: space-between; align-items: flex-end; }
@@ -79,24 +77,24 @@
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-workspace" onclick="switchTab('workspace')">Rug Design</button>
-        <button class="tab-btn" id="tab-history" onclick="switchTab('history')">Saved Rugs</button>
+        <button class="tab-btn active" id="tab-workspace" onclick="switchTab('workspace')">Quote Builder</button>
+        <button class="tab-btn" id="tab-history" onclick="switchTab('history')">Order History</button>
     </div>
 
     <div id="workspace" class="view active">
         <div class="live-result">
-            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;">Active Quote Total (Tax Inc.)</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;">Quote Total (Tax Inc.)</div>
             <div id="displayTotal" style="font-size: 2.2rem; font-weight: 900;">$0.00</div>
-            <div id="taxInfo" style="font-size: 0.75rem; opacity: 0.8;">Enter Zip for Tax...</div>
-            <div class="tax-control" style="margin-top:8px;">
-                <button onclick="manualTaxOverride()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">Manual Tax Override</button>
+            <div id="taxInfo" style="font-size: 0.75rem; opacity: 0.8;">Enter location for tax...</div>
+            <div style="margin-top:8px;">
+                <button onclick="manualTaxOverride()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">Manual Tax</button>
             </div>
         </div>
 
-        <button class="btn" style="background: #e2e8f0; color: #475569; margin-bottom: 15px; padding: 10px; font-size: 0.8rem;" onclick="newQuote()">↺ Clear & New Quote</button>
+        <button class="btn" style="background: #e2e8f0; color: #475569; margin-bottom: 15px; padding: 10px; font-size: 0.8rem;" onclick="newQuote()">↺ Clear Builder</button>
 
         <div class="card">
-            <div class="section-title">Customer Contact</div>
+            <div class="section-title">Client Information</div>
             <div class="grid-2">
                 <input type="text" id="custFirst" placeholder="First Name *" oninput="autoCap(this); validateInputs()">
                 <input type="text" id="custLast" placeholder="Last Name *" oninput="autoCap(this); validateInputs()">
@@ -117,26 +115,26 @@
         </div>
 
         <div class="card">
-            <div class="section-title">Rug Specifications</div>
-            <input type="text" id="roomName" placeholder="Room Location (e.g. Master Bedroom) *" oninput="autoCap(this); validateInputs()">
+            <div class="section-title">Fabrication Specs (Carpet Excl.)</div>
+            <input type="text" id="roomName" placeholder="Room/Area Name *" oninput="autoCap(this); validateInputs()">
             <div class="grid-2">
                 <div><label>Width (ft) *</label><input type="number" id="wA" oninput="validateInputs()"></div>
                 <div><label>Length (ft) *</label><input type="number" id="lB" oninput="validateInputs()"></div>
             </div>
             
             <div class="grid-2">
-                <div><label>Edge (Per Lft)</label><select id="edgeStyle" onchange="validateInputs()">
-                    <option value="2.50">Bind ($2.50/Lft)</option>
-                    <option value="6.00">Serge ($6.00/Lft)</option>
+                <div><label>Edge Style</label><select id="edgeStyle" onchange="validateInputs()">
+                    <option value="2.50">Binding ($2.50/Lft)</option>
+                    <option value="6.00">Serging ($6.00/Lft)</option>
                 </select></div>
-                <div><label>Attached Backing (Per SF)</label><select id="backingStyle" onchange="handleMutualExclusion('backing')">
+                <div><label>Backing (Applied)</label><select id="backingStyle" onchange="handleMutualExclusion('backing')">
                     <option value="0">None</option>
                     <option value="1.50">Soft Felt ($1.50/sf)</option>
                     <option value="2.25">Teebaud ($2.25/sf)</option>
                     <option value="2.00">Quad Back ($2.00/sf)</option>
                 </select></div>
             </div>
-            <label>Area Rug Pad (Loose - Per SF)</label>
+            <label>Loose Rug Padding</label>
             <select id="padStyle" onchange="handleMutualExclusion('pad')">
                 <option value="0">No Pad</option>
                 <option value="1.15">Value Hold ($1.15/sf)</option>
@@ -145,22 +143,22 @@
             </select>
             <div class="grid-2">
                 <div><label>Delivery (Flat)</label><select id="delv" onchange="updateLiveTotals()">
-                    <option value="0">No Delivery</option>
-                    <option value="125">Standard Delivery ($125)</option>
+                    <option value="0">N/A</option>
+                    <option value="125">Standard ($125)</option>
                 </select></div>
                 <div><label>Install (Flat)</label><select id="inst" onchange="updateLiveTotals()">
-                    <option value="0">No Install</option>
-                    <option value="100">Professional Install ($100)</option>
+                    <option value="0">N/A</option>
+                    <option value="100">Professional ($100)</option>
                 </select></div>
             </div>
-            <button class="btn btn-add" id="btnAddRug" disabled onclick="addRug()">+ Add Rug to Quote</button>
+            <button class="btn btn-add" id="btnAddRug" disabled onclick="addRug()">+ Add to Quote</button>
         </div>
 
         <div class="card" id="summaryCard" style="display:none;">
-            <div class="section-title">Order Items (Pre-Tax)</div>
+            <div class="section-title">Order Breakdown (Pre-Tax)</div>
             <div id="roomList"></div>
             <div id="feeList" style="margin-top: 15px;"></div>
-            <button class="btn btn-save" onclick="saveJob()">Save Order History</button>
+            <button class="btn btn-save" onclick="saveJob()">Save to History</button>
             <button class="btn btn-pdf" onclick="generatePDF()">Download Professional PDF</button>
         </div>
     </div>
@@ -175,7 +173,7 @@
     <div class="pdf-header-wrapper">
         <img src="choice-floors-logo.png" class="pdf-logo-img">
         <div class="pdf-title-block">
-            <h1 class="pdf-title-text">Choice Floors Rug Estimate</h1>
+            <h1 class="pdf-title-text">Rug Fabrication Quote</h1>
             <p style="margin:5px 0 0 0; font-weight: 600; font-size: 13px; opacity: 0.6;">Date: <span id="pdf-date"></span></p>
         </div>
     </div>
@@ -188,14 +186,15 @@
     <div class="pdf-body">
         <h2 id="pdf-client-name" style="margin:0; font-size: 22px; font-weight: 800;"></h2>
         <p id="pdf-client-address" style="margin:6px 0 20px 0; color: #475569; font-size: 14px;"></p>
+        <p style="font-size: 11px; font-weight: 800; color: var(--danger); text-transform: uppercase;">* Pricing excludes carpet material cost (purchased separately) *</p>
 
         <table class="pdf-table">
             <thead>
                 <tr>
-                    <th style="width: 30%;">Item / Room</th>
-                    <th style="width: 20%;">Calculations</th>
-                    <th style="width: 30%;">Specifications</th>
-                    <th style="width: 20%; text-align: right;">Price</th>
+                    <th style="width: 35%;">Room / Fabrication Area</th>
+                    <th style="width: 15%;">Calculations</th>
+                    <th style="width: 30%;">Fabrication Specs</th>
+                    <th style="width: 20%; text-align: right;">Cost</th>
                 </tr>
             </thead>
             <tbody id="pdf-item-rows"></tbody>
@@ -212,16 +211,15 @@
                     <span id="pdf-tax-amount" style="font-weight:600;"></span>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top: 2px solid #cbd5e1; padding-top: 10px; color: var(--choice-blue);">
-                    <span style="font-weight: 900; text-transform: uppercase; font-size: 11px; align-self:center;">Estimate Total</span>
+                    <span style="font-weight: 900; text-transform: uppercase; font-size: 11px; align-self:center;">Quote Total</span>
                     <span id="pdf-total-display" style="font-size: 28px; font-weight: 900;"></span>
                 </div>
             </div>
         </div>
-
         <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-            <p style="font-size: 11px; color: #94a3b8; font-style: italic;">Estimates are valid for 30 days. Final physical measurements may vary slightly based on material selection.</p>
+            <p style="font-size: 11px; color: #94a3b8; font-style: italic;">Fabrication prices are based on dimensions provided. Final measurements verified upon material drop-off.</p>
             <div style="margin-top: 30px; border-bottom: 1px solid #1e293b; width: 250px;"></div>
-            <p style="font-size: 10px; font-weight: 800; text-transform: uppercase;">Customer Signature & Date</p>
+            <p style="font-size: 10px; font-weight: 800; text-transform: uppercase;">Customer Approval & Date</p>
         </div>
     </div>
 </div>
@@ -233,7 +231,7 @@
     let isManualTax = false;
     let editingJobId = null;
 
-    function newQuote() { if(confirm("Clear current work?")) location.reload(); }
+    function newQuote() { if(confirm("Discard current progress?")) location.reload(); }
 
     function handleMutualExclusion(trigger) {
         const b = document.getElementById('backingStyle'), p = document.getElementById('padStyle');
@@ -262,8 +260,7 @@
 
     function validateInputs() {
         const fields = ['custFirst','custLast','custPhone','custEmail','custStreet','custCity','custState','custZip','roomName','wA','lB'];
-        const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
-        document.getElementById('btnAddRug').disabled = !allFilled;
+        document.getElementById('btnAddRug').disabled = !fields.every(id => document.getElementById(id).value.trim() !== "");
         updateLiveTotals();
     }
 
@@ -275,16 +272,16 @@
         const bR = parseFloat(document.getElementById('backingStyle').value) || 0;
         const pR = parseFloat(document.getElementById('padStyle').value) || 0;
         
-        const activeRugCost = (w > 0 && l > 0) ? ((w*2+l*2)*eR + (w*l)*bR + (w*l)*pR) : 0;
-        const deliveryFlat = parseFloat(document.getElementById('delv').value) || 0;
-        const installFlat = parseFloat(document.getElementById('inst').value) || 0;
+        const currentActiveCost = (w > 0 && l > 0) ? ((w*2+l*2)*eR + (w*l)*bR + (w*l)*pR) : 0;
+        const d = parseFloat(document.getElementById('delv').value) || 0;
+        const i = parseFloat(document.getElementById('inst').value) || 0;
         
-        const subtotal = rugSubtotal + activeRugCost + deliveryFlat + installFlat;
+        const subtotal = rugSubtotal + currentActiveCost + d + i;
         const tax = subtotal * currentTaxRate;
         
         document.getElementById('displayTotal').innerText = `$${(subtotal + tax).toFixed(2)}`;
         document.getElementById('taxInfo').innerText = `Subtotal: $${subtotal.toFixed(2)} | Tax: $${tax.toFixed(2)}`;
-        renderFees(deliveryFlat, installFlat);
+        renderFees(d, i);
     }
 
     function addRug() {
@@ -306,16 +303,15 @@
         document.getElementById('roomList').innerHTML = currentRugs.map((r, i) => `
             <div class="room-tag">
                 <div class="room-tag-header"><b>${r.name}</b><div class="room-tag-btns"><button class="btn-inline btn-edit" onclick="editRug(${i})">EDIT</button><button class="btn-inline btn-remove" onclick="removeRug(${i})">REMOVE</button></div></div>
-                <div style="font-size: 0.8rem; opacity: 0.8;">${r.w}'x${r.l}' | ${r.sqft}sqft | ${r.perim}lft</div>
-                <div style="font-weight:bold; color:var(--choice-blue);">$${r.cost.toFixed(2)}</div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">${r.w}' x ${r.l}' | Fab: ${r.cost.toFixed(2)}</div>
             </div>`).join('');
         document.getElementById('summaryCard').style.display = 'block';
     }
 
     function renderFees(d, i) {
         let html = "";
-        if(d > 0) html += `<div class="fee-tag"><span>Delivery Fee</span><b>$${d.toFixed(2)}</b></div>`;
-        if(i > 0) html += `<div class="fee-tag"><span>Installation Fee</span><b>$${i.toFixed(2)}</b></div>`;
+        if(d > 0) html += `<div class="fee-tag"><span>Flat Delivery</span><b>$${d.toFixed(2)}</b></div>`;
+        if(i > 0) html += `<div class="fee-tag"><span>Flat Installation</span><b>$${i.toFixed(2)}</b></div>`;
         document.getElementById('feeList').innerHTML = html;
     }
 
@@ -325,7 +321,7 @@
         currentRugs.splice(i,1); renderRugs(); updateLiveTotals();
     }
 
-    function removeRug(i) { if(confirm("Remove item?")) { currentRugs.splice(i,1); renderRugs(); updateLiveTotals(); } }
+    function removeRug(i) { currentRugs.splice(i,1); renderRugs(); updateLiveTotals(); }
 
     async function generatePDF() {
         const { jsPDF } = window.jspdf;
@@ -336,14 +332,14 @@
         let rows = currentRugs.map(r => `
             <tr>
                 <td><b>${r.name}</b></td>
-                <td><span class="math-detail">${r.sqft} Sqft / ${r.perim} Lft</span></td>
+                <td><span class="math-detail">${r.sqft} Sqft<br>${r.perim} Lft</span></td>
                 <td><small>${r.edge}<br>Backing: ${r.backing}<br>Pad: ${r.pad}</small></td>
                 <td style="text-align:right; font-weight:700;">$${r.cost.toFixed(2)}</td>
             </tr>`).join('');
 
         const dVal = parseFloat(document.getElementById('delv').value), iVal = parseFloat(document.getElementById('inst').value);
-        if(dVal > 0) rows += `<tr style="background:#f8fafc"><td><b>Standard Delivery</b></td><td>-</td><td>Flat Service Fee</td><td style="text-align:right; font-weight:700;">$${dVal.toFixed(2)}</td></tr>`;
-        if(iVal > 0) rows += `<tr style="background:#f8fafc"><td><b>Professional Install</b></td><td>-</td><td>Flat Service Fee</td><td style="text-align:right; font-weight:700;">$${iVal.toFixed(2)}</td></tr>`;
+        if(dVal > 0) rows += `<tr style="background:#f8fafc"><td><b>Flat Delivery</b></td><td>-</td><td>Service Fee</td><td style="text-align:right; font-weight:700;">$${dVal.toFixed(2)}</td></tr>`;
+        if(iVal > 0) rows += `<tr style="background:#f8fafc"><td><b>Flat Installation</b></td><td>-</td><td>Service Fee</td><td style="text-align:right; font-weight:700;">$${iVal.toFixed(2)}</td></tr>`;
         
         document.getElementById('pdf-item-rows').innerHTML = rows;
         const sub = currentRugs.reduce((a, b) => a + b.cost, 0) + dVal + iVal;
@@ -355,7 +351,7 @@
         const canvas = await html2canvas(document.getElementById('pdf-template'), { scale: 2 });
         const pdf = new jsPDF('p', 'mm', 'a4');
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-        pdf.save(`Rug_Estimate_${document.getElementById('custLast').value}.pdf`);
+        pdf.save(`Fab_Quote_${document.getElementById('custLast').value}.pdf`);
     }
 
     function saveJob() {
@@ -363,7 +359,7 @@
         if (editingJobId) { const index = savedJobs.findIndex(j => j.id === editingJobId); if (index !== -1) savedJobs[index] = job; } 
         else { savedJobs.unshift(job); }
         localStorage.setItem('rugJobsMaster', JSON.stringify(savedJobs)); 
-        alert("Saved to history.");
+        alert("Saved to History.");
     }
 
     function renderHistory() {
